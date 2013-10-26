@@ -2,7 +2,9 @@ from libmproxy import controller, proxy
 import os
 
 class CollectionCreatorProxy(controller.Master):
-	def __init__(self, server):
+	def __init__(self, server, collection, rules):
+		self.collection = collection
+		self.rules = rules
 		controller.Master.__init__(self, server)
 
 	def run(self):
@@ -10,6 +12,7 @@ class CollectionCreatorProxy(controller.Master):
 			return controller.Master.run(self)
 		except KeyboardInterrupt:
 			self.shutdown()
+
 
 	def handle_request(self, msg):
 		print msg.host
