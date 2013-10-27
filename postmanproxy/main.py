@@ -1,5 +1,6 @@
 from postman.collection import Collection
 from postman.collection_creator_proxy import CollectionCreatorProxy
+from postman.header_filter_proxy import HeaderFilterProxy
 from libmproxy import controller, proxy
 from optparse import OptionParser
 import signal
@@ -22,7 +23,6 @@ def start_creator_proxy(options):
 	methods = options.methods
 	status_codes = ""
 
-	print "Hey! This is the Postman proxy!"
 	print "Press Ctrl+C to stop the proxy"
 
 	rules = {
@@ -45,12 +45,17 @@ def start_creator_proxy(options):
 	signal.pause()
 
 def start_filter_proxy(options):
-	pass
+	print "Press Ctrl+C to stop the proxy"
+	config = proxy.ProxyConfig()
+	server = proxy.ProxyServer(config, 8080)
+	m = HeaderFilterProxy()
+	m.run()
 
 def main():
 	parser = OptionParser(usage="Usage: %prog [options] filename")
 	parser.add_option("-o", "--operation", dest="operation", help="filter/save. Default is save", default="save")
 	parser.add_option("-n", "--name", dest="name", help="Collection name", default="default")
+	parser.add_option("-r", "--port", dest="port", help="Port for the proxy", default=8080)
 	parser.add_option("-p", "--path", dest="path", help="Target path for saving the collection", default="")
 	parser.add_option("-t", "--host", dest="host", help="Only allow URLs of this host", default="")
 	parser.add_option("-m", "--methods", dest="methods", help="Comma separated list of allowed methods. Default is all methods", default="")
