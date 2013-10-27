@@ -1,4 +1,6 @@
 from libmproxy import controller, proxy
+from request import Request
+from collection import Collection
 import os
 
 class CollectionCreatorProxy(controller.Master):
@@ -13,17 +15,17 @@ class CollectionCreatorProxy(controller.Master):
 		except KeyboardInterrupt:
 			self.shutdown()
 
-
 	def handle_request(self, msg):
-		print msg.host
-		print msg.port
-		print msg.headers
-		print msg.content
 		# URLEncoded and raw are solved
 		# Left with form-data: Can be done by werkzeug?
 
-		print self.__dict__.keys()
-		print msg.__dict__.keys()
+		# print self.__dict__.keys()
+		# print msg.__dict__.keys()
+
+		request = Request(self.collection.id)
+		request.init_from_proxy(msg)
+
+		self.collection.add_request(request)
 
 		msg.reply()
 
