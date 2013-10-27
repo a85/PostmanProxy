@@ -16,12 +16,6 @@ class CollectionCreatorProxy(controller.Master):
 			self.shutdown()
 
 	def handle_request(self, msg):
-		# URLEncoded and raw are solved
-		# Left with form-data: Can be done by werkzeug?
-
-		# print self.__dict__.keys()
-		# print msg.__dict__.keys()
-
 		request = Request(self.collection.id)
 		request.init_from_proxy(msg)
 

@@ -92,7 +92,11 @@ class Request:
 		return proxy_request.path
 
 	def get_url(self, proxy_request):
-		url = 'http://' + proxy_request.host + proxy_request.path
+		if proxy_request.port != 80:
+			url = 'http://' + proxy_request.host + ":" + str(proxy_request.port) + proxy_request.path
+		else:
+			url = 'http://' + proxy_request.host + proxy_request.path
+
 		return url
 
 	def get_data_mode(self, proxy_request):
@@ -118,6 +122,8 @@ class Request:
 			return False
 
 
+	def get_headers(self, headers):
+		pass
 	def init_from_proxy(self, proxy_request):
 		self.name = self.get_name(proxy_request)
 		self.url = self.get_url(proxy_request)
