@@ -20,7 +20,7 @@ def start_creator_proxy(options):
 	path = options.path
 	host = options.host
 	methods = options.methods
-	status_codes = options.status_codes
+	status_codes = ""
 
 	print "Hey! This is the Postman proxy!"
 	print "Press Ctrl+C to stop the proxy"
@@ -53,8 +53,8 @@ def main():
 	parser.add_option("-n", "--name", dest="name", help="Collection name", default="default")
 	parser.add_option("-p", "--path", dest="path", help="Target path for saving the collection", default="")
 	parser.add_option("-t", "--host", dest="host", help="Only allow URLs of this host", default="")
-	parser.add_option("-m", "--methods", dest="methods", help="Comma separated list of allowed methods. Default is all methods", default=[])
-	parser.add_option("-s", "--status_codes", dest="status_codes", help="Comma separated list of allowed status codes. Default is all codes", default=[])
+	parser.add_option("-m", "--methods", dest="methods", help="Comma separated list of allowed methods. Default is all methods", default="")
+	# parser.add_option("-s", "--status_codes", dest="status_codes", help="Comma separated list of allowed status codes. Default is all codes", default=[])
 
 	(options, args) = parser.parse_args()
 

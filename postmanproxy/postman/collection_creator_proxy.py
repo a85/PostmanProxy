@@ -11,11 +11,12 @@ class CollectionCreatorProxy(controller.Master):
 		self.methods = self.get_methods(rules['methods'])
 		self.status_codes = self.get_status_codes(rules['status_codes'])
 
-		print self.host, self.methods, self.status_codes
-
 		controller.Master.__init__(self, server)
 
 	def get_methods(self, methodString):
+		if methodString == '':
+			return []
+
 		m = methodString.split(',')
 		methods = []
 		for method in m:
@@ -30,7 +31,9 @@ class CollectionCreatorProxy(controller.Master):
 		status_codes = []
 		for status_code in c:
 			status_code = status_code.strip()
-			status_codes.append(int(status_code))
+
+			if status_code != "":
+				status_codes.append(int(status_code))
 
 		return status_codes
 
@@ -48,7 +51,7 @@ class CollectionCreatorProxy(controller.Master):
 		allowed_method = True
 		allowed_status_code = True
 
-		if self.host != "":
+		if not self.host == '':
 			if self.host == msg.host:
 				allowed_host = True
 			else:

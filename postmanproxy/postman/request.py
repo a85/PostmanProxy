@@ -123,11 +123,17 @@ class Request:
 
 
 	def get_headers(self, headers):
-		pass
+		head_string = ""
+		for k, v in headers:
+			head_string += k + ": " + v + "\n"
+
+		return head_string
+
 	def init_from_proxy(self, proxy_request):
 		self.name = self.get_name(proxy_request)
 		self.url = self.get_url(proxy_request)
 		self.method = proxy_request.method
+		self.headers = self.get_headers(proxy_request.headers)
 
 		try:
 			if self.method_has_body(self.method):
