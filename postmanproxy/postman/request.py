@@ -9,7 +9,7 @@ from cStringIO import StringIO
 
 class Request:
 	def __init__(self, collectionId):
-		self.id = uuid.uuid4()
+		self.id = str(uuid.uuid4())
 		self.collectionId = collectionId
 		self.url = ""
 		self.name = ""
@@ -20,7 +20,27 @@ class Request:
 		self.dataMode = "raw"
 		self.responses = []
 		self.version = 2
-		self.timestamp = time.time()
+		self.timestamp = int(round(time.time()))
+
+	def get_json(self):
+		r = {
+			'id': self.id,
+			'collectionId': self.collectionId,
+			'url': self.url,
+			'name': self.name,
+			'description': self.description,
+			'method': self.method,
+			'headers': self.headers,
+			'data': self.data,
+			'dataMode': self.dataMode,
+			'responses': self.responses,
+			'version': self.version,
+			'timestamp': self.timestamp
+		}
+
+		print r
+
+		return r
 
 	def get_formdata_body(self, data, header, method):
 		# http://werkzeug.pocoo.org/docs/http/
@@ -32,7 +52,18 @@ class Request:
 		}
 
 		stream, form, files = parse_form_data(environ)
-		print form
+
+		d = []
+		for k, v in form.iteritems():
+			o = {
+				'key': k,
+				'value': v,
+				'type': 'text'
+			}
+
+			d.append(o)
+
+		return d
 
 	def get_urlencoded_body(self, data, header, method):
 		# http://werkzeug.pocoo.org/docs/quickstart/#wsgi-environment
@@ -44,13 +75,24 @@ class Request:
 		}
 
 		stream, form, files = parse_form_data(environ)
-		print form
+
+		d = []
+		for k, v in form.iteritems():
+			o = {
+				'key': k,
+				'value': v,
+				'type': 'text'
+			}
+
+			d.append(o)
+
+		return d
 
 	def get_name(self, proxy_request):
 		return proxy_request.path
 
 	def get_url(self, proxy_request):
-		url = proxy_request.host + proxy_request.path
+		url = 'http://' + proxy_request.host + proxy_request.path
 		return url
 
 	def get_data_mode(self, proxy_request):
@@ -83,9 +125,8 @@ class Request:
 
 		try:
 			if self.method_has_body(self.method):
-				print "Method has a body"
-
 				self.dataMode = self.get_data_mode(proxy_request)
+				print "Data mode is %s" % (self.dataMode)
 				content = proxy_request.content
 
 				if "content-type" in proxy_request.headers:
@@ -97,10 +138,9 @@ class Request:
 						self.data = self.get_formdata_body(content, h, self.method)
 					else:
 						self.data = content
-						print self.data
 				else:
 					self.data = content
 			else:
-				print "Method does not have a body %s" % (self.url)
+				pass
 		except Exception as ex:
 			logging.exception("Something awful happened!")

@@ -5,12 +5,18 @@ from optparse import OptionParser
 import signal
 import sys
 
+collection = False
+
 def signal_handler(signal, frame):
-    print 'You pressed Ctrl+C!'
-    sys.exit(0)
+	global collection
+	print 'You pressed Ctrl+C! Here is the collection file'
+	print collection.save()
+	sys.exit(0)
 
 def main():
+	global collection
 	print "Hey! This is the Postman proxy!"
+	print "Press Ctrl+C to stop the proxy"
 	rules = []
 
 	collection = Collection("Postman")
@@ -18,11 +24,11 @@ def main():
 	server = proxy.ProxyServer(config, 8080)
 	m = CollectionCreatorProxy(server, collection, rules)
 
-	# signal.signal(signal.SIGINT, signal_handler)
-	# print 'Press Ctrl+C to exit'
-	# signal.pause()
-
 	m.run()
+
+	signal.signal(signal.SIGINT, signal_handler)
+	print 'Press Ctrl+C again to save the collection'
+	signal.pause()
 
 if __name__ == "__main__":
     main()
