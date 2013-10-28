@@ -5,6 +5,7 @@ from libmproxy import controller, proxy
 from optparse import OptionParser
 import signal
 import sys
+import os
 
 collection = False
 
@@ -34,7 +35,9 @@ def start_creator_proxy(options):
 	print "Rules are", rules
 
 	collection = Collection(name)
-	config = proxy.ProxyConfig()
+	config = proxy.ProxyConfig(
+		cacert = os.path.expanduser("~/.mitmproxy/mitmproxy-ca.pem")
+	)
 	server = proxy.ProxyServer(config, 8080)
 	m = CollectionCreatorProxy(server, collection, rules)
 
@@ -46,9 +49,11 @@ def start_creator_proxy(options):
 
 def start_filter_proxy(options):
 	print "Press Ctrl+C to stop the proxy"
-	config = proxy.ProxyConfig()
+	config = proxy.ProxyConfig(
+		cacert = os.path.expanduser("~/.mitmproxy/mitmproxy-ca.pem")
+	)
 	server = proxy.ProxyServer(config, 8080)
-	m = HeaderFilterProxy()
+	m = HeaderFilterProxy(server)
 	m.run()
 
 def main():
