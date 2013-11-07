@@ -6,8 +6,9 @@ import json
 class Collection:
 	"""Postman collection class"""
 
-	def __init__(self, name):
+	def __init__(self, name, path):
 		self.id = str(uuid.uuid4())
+		self.path = path
 		self.name = name
 		self.order = []
 		self.folders = []
@@ -51,7 +52,11 @@ class Collection:
 		return json
 
 	def save(self):
-		target = self.name + ".postman_collection"
+		if self.path:
+			target = self.path + self.name + ".postman_collection"
+		else:
+			target = self.name + ".postman_collection"
+
 		data = self.get_json()
 		with open(target, 'w') as outfile:
 			json.dump(data, outfile)

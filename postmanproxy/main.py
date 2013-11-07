@@ -18,27 +18,28 @@ def signal_handler(signal, frame):
 def start_creator_proxy(options):
 	global collection
 
+	port = int(options.port)
 	name = options.name
 	path = options.path
 	host = options.host
 	methods = options.methods
 	status_codes = ""
 
+	print "Proxy running at %d" % (port)
 	print "Press Ctrl+C to stop the proxy"
 
 	rules = {
 		'host': host,
-		'methods': methods,
-		'status_codes': status_codes
+		'methods': methods
 	}
 
 	print "Rules are", rules
 
-	collection = Collection(name)
+	collection = Collection(name, path)
 	config = proxy.ProxyConfig(
 		cacert = os.path.expanduser("~/.mitmproxy/mitmproxy-ca.pem")
 	)
-	server = proxy.ProxyServer(config, 8080)
+	server = proxy.ProxyServer(config, port)
 	m = CollectionCreatorProxy(server, collection, rules)
 
 	m.run()
@@ -49,16 +50,17 @@ def start_creator_proxy(options):
 
 def start_filter_proxy(options):
 	print "Press Ctrl+C to stop the proxy"
+	port = int(options.port)
 	config = proxy.ProxyConfig(
 		cacert = os.path.expanduser("~/.mitmproxy/mitmproxy-ca.pem")
 	)
-	server = proxy.ProxyServer(config, 8080)
+	server = proxy.ProxyServer(config, port)
 	m = HeaderFilterProxy(server)
 	m.run()
 
 def main():
 	parser = OptionParser(usage="Usage: %prog [options] filename")
-	parser.add_option("-o", "--operation", dest="operation", help="filter/save. Default is save", default="save")
+	parser.add_option("-o", "--operation", dest="operation", help="1. Filter requests (filter)\n 2. Save request to a collection (save)\n (Default is save)", default="save")
 	parser.add_option("-n", "--name", dest="name", help="Collection name", default="default")
 	parser.add_option("-r", "--port", dest="port", help="Port for the proxy", default=8080)
 	parser.add_option("-p", "--path", dest="path", help="Target path for saving the collection", default="")
