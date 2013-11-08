@@ -2,6 +2,8 @@ from libmproxy import controller, proxy
 from request import Request
 from collection import Collection
 import os
+import socket
+import json
 
 class CollectionCreatorProxy(controller.Master):
 	def __init__(self, server, collection, rules):
@@ -9,9 +11,25 @@ class CollectionCreatorProxy(controller.Master):
 		self.rules = rules
 		self.host = rules['host']
 		self.methods = self.get_methods(rules['methods'])
-		self.status_codes = self.get_status_codes(rules['status_codes'])
+		# self.status_codes = self.get_status_codes(rules['status_codes'])
 
 		controller.Master.__init__(self, server)
+
+	def send_to_postman(self, request):
+		TCP_IP = '127.0.0.1'
+		TCP_PORT = 5005
+		BUFFER_SIZE = 1024
+		MESSAGE = json.dumps(request.get_json())
+
+		print MESSAGE
+
+		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		s.connect((TCP_IP, TCP_PORT))
+		s.send(MESSAGE)
+		data = s.recv(BUFFER_SIZE)
+		s.close()
+
+		print "received data:", data
 
 	def get_methods(self, methodString):
 		if methodString == '':
@@ -65,6 +83,8 @@ class CollectionCreatorProxy(controller.Master):
 
 		if allowed_method and allowed_host and allowed_status_code:
 			self.collection.add_request(request)
+
+		self.send_to_postman(request)
 
 		msg.reply()
 
