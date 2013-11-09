@@ -70,31 +70,34 @@ class CollectionCreatorProxy(controller.Master):
 			self.shutdown()
 
 	def handle_request(self, msg):
-		request = Request(self.collection.id)
-		request.init_from_proxy(msg)
+		try:
+			request = Request(self.collection.id)
+			request.init_from_proxy(msg)
 
-		allowed_host = True
-		allowed_method = True
-		allowed_status_code = True
+			allowed_host = True
+			allowed_method = True
+			allowed_status_code = True
 
-		if not self.host == '':
-			if self.host == msg.host:
-				allowed_host = True
-			else:
-				allowed_host = False
+			if not self.host == '':
+				if self.host == msg.host:
+					allowed_host = True
+				else:
+					allowed_host = False
 
-		if len(self.methods) > 0:
-			if msg.method in self.methods:
-				allowed_method = True
-			else:
-				allowed_method = False
+			if len(self.methods) > 0:
+				if msg.method in self.methods:
+					allowed_method = True
+				else:
+					allowed_method = False
 
-		if allowed_method and allowed_host and allowed_status_code:
-			self.collection.add_request(request)
+			if allowed_method and allowed_host and allowed_status_code:
+				self.collection.add_request(request)
 
-			if self.tcp_connection:
-				print "Send to Postman"
-				self.send_to_postman(request)
+				if self.tcp_connection:
+					print "Send to Postman"
+					self.send_to_postman(request)
+		except Exception as ex:
+			logging.exception("Something awful happened!")
 
 		msg.reply()
 
