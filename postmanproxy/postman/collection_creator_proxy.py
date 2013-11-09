@@ -4,32 +4,40 @@ from collection import Collection
 import os
 import socket
 import json
+import logging
 
 class CollectionCreatorProxy(controller.Master):
-	def __init__(self, server, collection, rules):
+	def __init__(self, server, collection, rules, tcp_connection=False, tcp_host="127.0.0.1", tcp_port=5005):
 		self.collection = collection
 		self.rules = rules
 		self.host = rules['host']
 		self.methods = self.get_methods(rules['methods'])
+		self.tcp_connection = tcp_connection
+		self.tcp_host = tcp_host
+		self.tcp_port = tcp_port
 		# self.status_codes = self.get_status_codes(rules['status_codes'])
 
 		controller.Master.__init__(self, server)
 
 	def send_to_postman(self, request):
-		TCP_IP = '127.0.0.1'
-		TCP_PORT = 5005
-		BUFFER_SIZE = 1024
-		MESSAGE = json.dumps(request.get_json())
+		try:
+			TCP_IP = self.tcp_host
+			TCP_PORT = self.tcp_port
+			BUFFER_SIZE = 1024
+			MESSAGE = json.dumps(request.get_json())
 
-		print MESSAGE
+			print MESSAGE
 
-		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		s.connect((TCP_IP, TCP_PORT))
-		s.send(MESSAGE)
-		data = s.recv(BUFFER_SIZE)
-		s.close()
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			s.connect((TCP_IP, TCP_PORT))
+			s.send(MESSAGE)
+			data = s.recv(BUFFER_SIZE)
+			s.close()
 
-		print "received data:", data
+			print "received data:", data
+		except Exception as ex:
+			logging.exception("Something awful happened!")
+
 
 	def get_methods(self, methodString):
 		if methodString == '':
@@ -84,7 +92,9 @@ class CollectionCreatorProxy(controller.Master):
 		if allowed_method and allowed_host and allowed_status_code:
 			self.collection.add_request(request)
 
-		self.send_to_postman(request)
+			if self.tcp_connection:
+				print "Send to Postman"
+				self.send_to_postman(request)
 
 		msg.reply()
 

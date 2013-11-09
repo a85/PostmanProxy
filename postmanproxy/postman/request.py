@@ -38,8 +38,6 @@ class Request:
 			'timestamp': self.timestamp
 		}
 
-		print r
-
 		return r
 
 	def get_formdata_body(self, data, header, method):

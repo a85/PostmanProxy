@@ -2,7 +2,7 @@ from postman.collection import Collection
 from postman.collection_creator_proxy import CollectionCreatorProxy
 from postman.header_filter_proxy import HeaderFilterProxy
 from libmproxy import controller, proxy
-from optparse import OptionParser
+import argparse
 import signal
 import sys
 import os
@@ -33,14 +33,12 @@ def start_creator_proxy(options):
 		'methods': methods
 	}
 
-	print "Rules are", rules
-
 	collection = Collection(name, path)
 	config = proxy.ProxyConfig(
 		cacert = os.path.expanduser("~/.mitmproxy/mitmproxy-ca.pem")
 	)
 	server = proxy.ProxyServer(config, port)
-	m = CollectionCreatorProxy(server, collection, rules)
+	m = CollectionCreatorProxy(server, collection, rules, tcp_connection=options.tcp_connection, tcp_host=options.tcp_host, tcp_port=options.tcp_port)
 
 	m.run()
 
@@ -59,25 +57,28 @@ def start_filter_proxy(options):
 	m.run()
 
 def main():
-	parser = OptionParser(usage="Usage: %prog [options] filename")
-	parser.add_option("-o", "--operation", dest="operation", help="1. Filter requests (filter)\n 2. Save request to a collection (save)\n (Default is save)", default="save")
-	parser.add_option("-n", "--name", dest="name", help="Collection name", default="default")
-	parser.add_option("-r", "--port", dest="port", help="Port for the proxy", default=8080)
-	parser.add_option("-p", "--path", dest="path", help="Target path for saving the collection", default="")
-	parser.add_option("-t", "--host", dest="host", help="Only allow URLs of this host", default="")
-	parser.add_option("-m", "--methods", dest="methods", help="Comma separated list of allowed methods. Default is all methods", default="")
+	parser = argparse.ArgumentParser(description='PostmanProxy. TODO Add more detailed page')
+	parser.add_argument('operation', metavar='Operation', type=str, help='filter or save', default='save')
+	parser.add_argument("--name", help="Collection name", default="default")
+	parser.add_argument("--port", help="Port for the proxy. Default=8080", default=8080)
+	parser.add_argument("--path", help="Target path for saving the collection. Default is current directory", default="")
+	parser.add_argument("--host", help="Only allow URLs of this host. Default is all URLs", default="")
+	parser.add_argument("--methods", help="Comma separated list of allowed methods. Default is all methods", default="")
+	parser.add_argument("--tcp_connection", type=bool, help="Availble for the save option. Set to true to send requests to Postman. Default is False.", default=False)
+	parser.add_argument("--tcp_host", help="TCP host to forward to", default="127.0.0.1")
+	parser.add_argument("--tcp_port", help="TCP port", default=5005)
 	# parser.add_option("-s", "--status_codes", dest="status_codes", help="Comma separated list of allowed status codes. Default is all codes", default=[])
 
-	(options, args) = parser.parse_args()
+	args = parser.parse_args()
 
-	if options.operation == "save":
-		start_creator_proxy(options)
-	elif options.operation == "filter":
-		start_filter_proxy(options)
+	operation = args.operation
+
+	if operation == "save":
+		start_creator_proxy(args)
+	elif operation == "filter":
+		start_filter_proxy(args)
 	else:
-		start_creator_proxy(options)
-
-
+		start_creator_proxy(args)
 
 if __name__ == "__main__":
     main()
