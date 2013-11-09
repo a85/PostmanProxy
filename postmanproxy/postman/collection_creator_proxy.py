@@ -23,7 +23,7 @@ class CollectionCreatorProxy(controller.Master):
 		try:
 			TCP_IP = self.tcp_host
 			TCP_PORT = self.tcp_port
-			BUFFER_SIZE = 1024
+			BUFFER_SIZE = 1024 * 100
 			MESSAGE = json.dumps(request.get_json())
 
 			print MESSAGE
