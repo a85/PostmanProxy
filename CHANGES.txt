@@ -1,4 +1,11 @@
+0.1.3
+======
+- Fix Werkzeug dependency in setup.py
+
+0.1.2
+======
+- Connecting to local Postman client through a TCP socket
+
 0.1.1
 ======
-
 - Added port and path settings

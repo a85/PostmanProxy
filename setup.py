@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='PostmanProxy',
-    version='0.1.1',
+    version='0.1.3',
     author='Abhinav Asthana',
     author_email='abhinav@rickreation.com',
     packages=['postmanproxy'],
@@ -17,6 +17,6 @@ setup(
     },
     install_requires=[
         "mitmproxy >= 0.9.2",
-        "werkzeug >= 0.10"
+        "Werkzeug >= 0.9.4"
     ],
 )
