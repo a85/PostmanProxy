@@ -90,10 +90,12 @@ class Request:
 		return proxy_request.path
 
 	def get_url(self, proxy_request):
-		if proxy_request.port != 80:
-			url = 'http://' + proxy_request.host + ":" + str(proxy_request.port) + proxy_request.path
-		else:
+		if proxy_request.port == 443:
+			url = 'https://' + proxy_request.host + proxy_request.path
+		elif proxy_request.port == 80:
 			url = 'http://' + proxy_request.host + proxy_request.path
+		else:
+			url = 'http://' + proxy_request.host + ":" + str(proxy_request.port) + proxy_request.path
 
 		return url
 
@@ -102,7 +104,7 @@ class Request:
 			content_type = proxy_request.headers["content-type"][0]
 			print content_type
 
-			if content_type.find("urlencoded") > 0:
+			if content_type.find("x-www-form-urlencoded") > 0:
 				return "urlencoded"
 			elif content_type.find("form-data") > 0:
 				return "params"
@@ -131,6 +133,7 @@ class Request:
 		self.name = self.get_name(proxy_request)
 		self.url = self.get_url(proxy_request)
 		self.method = proxy_request.method
+		self.headersKvPairs = proxy_request.headers
 		self.headers = self.get_headers(proxy_request.headers)
 
 		try:

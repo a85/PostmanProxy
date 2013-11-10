@@ -22,6 +22,12 @@ def start_creator_proxy(options):
 	name = options.name
 	path = options.path
 	host = options.host
+
+	if options.restricted_headers == 'false':
+		restricted_headers = False
+	else:
+		restricted_headers = True
+
 	methods = options.methods
 	status_codes = ""
 
@@ -30,7 +36,8 @@ def start_creator_proxy(options):
 
 	rules = {
 		'host': host,
-		'methods': methods
+		'methods': methods,
+		'restricted_headers': restricted_headers
 	}
 
 	collection = Collection(name, path)
@@ -38,7 +45,13 @@ def start_creator_proxy(options):
 		cacert = os.path.expanduser("~/.mitmproxy/mitmproxy-ca.pem")
 	)
 	server = proxy.ProxyServer(config, port)
-	m = CollectionCreatorProxy(server, collection, rules, tcp_connection=options.tcp_connection, tcp_host=options.tcp_host, tcp_port=options.tcp_port)
+
+	if options.tcp_connection == 'false':
+		tcp_connection = False
+	else:
+		tcp_connection = True
+
+	m = CollectionCreatorProxy(server, collection, rules, tcp_connection=tcp_connection, tcp_host=options.tcp_host, tcp_port=options.tcp_port)
 
 	m.run()
 
@@ -64,7 +77,8 @@ def main():
 	parser.add_argument("--path", help="Target path for saving the collection. Default is current directory", default="")
 	parser.add_argument("--host", help="Only allow URLs of this host. Default is all URLs", default="")
 	parser.add_argument("--methods", help="Comma separated list of allowed methods. Default is all methods", default="")
-	parser.add_argument("--tcp_connection", type=bool, help="Availble for the save option. Set to true to send requests to Postman. Default is False.", default=False)
+	parser.add_argument("--restricted_headers", type=str, help="Enable restricted headers. Default is false.", default='false')
+	parser.add_argument("--tcp_connection", type=str, help="Availble for the save option. Set to true to send requests to Postman. Default is False.", default='false')
 	parser.add_argument("--tcp_host", help="TCP host to forward to", default="127.0.0.1")
 	parser.add_argument("--tcp_port", help="TCP port", default=5005)
 	# parser.add_option("-s", "--status_codes", dest="status_codes", help="Comma separated list of allowed status codes. Default is all codes", default=[])

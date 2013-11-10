@@ -1,6 +1,7 @@
 from libmproxy import controller, proxy
 from request import Request
 from collection import Collection
+import copy
 import os
 import socket
 import json
@@ -8,6 +9,30 @@ import logging
 
 class CollectionCreatorProxy(controller.Master):
 	def __init__(self, server, collection, rules, tcp_connection=False, tcp_host="127.0.0.1", tcp_port=5005):
+		self.restricted_headers = [
+		    'accept-charset',
+		    'accept-encoding',
+		    'access-control-request-headers',
+		    'access-control-request-method',
+		    'connection',
+		    'content-length',
+		    'cookie',
+		    'cookie2',
+		    'content-transfer-encoding',
+		    'date',
+		    'expect',
+		    'host',
+		    'keep-alive',
+		    'origin',
+		    'referer',
+		    'te',
+		    'trailer',
+		    'transfer-encoding',
+		    'upgrade',
+		    'user-agent',
+		    'via'
+		    ]
+
 		self.collection = collection
 		self.rules = rules
 		self.host = rules['host']
@@ -18,6 +43,17 @@ class CollectionCreatorProxy(controller.Master):
 		# self.status_codes = self.get_status_codes(rules['status_codes'])
 
 		controller.Master.__init__(self, server)
+
+	def remove_restricted_headers(self, request):
+		restricted_headers = self.restricted_headers
+		headers = copy.deepcopy(request.headersKvPairs)
+
+		for k, v in headers:
+			key = k.lower()
+			if key in restricted_headers:
+				del headers[key]
+
+		request.headers = request.get_headers(headers)
 
 	def send_to_postman(self, request):
 		try:
@@ -74,6 +110,7 @@ class CollectionCreatorProxy(controller.Master):
 			request = Request(self.collection.id)
 			request.init_from_proxy(msg)
 
+			print request.headers
 			allowed_host = True
 			allowed_method = True
 			allowed_status_code = True
@@ -91,15 +128,20 @@ class CollectionCreatorProxy(controller.Master):
 					allowed_method = False
 
 			if allowed_method and allowed_host and allowed_status_code:
+				print self.rules
+				if not self.rules['restricted_headers']:
+					self.remove_restricted_headers(request)
+
 				self.collection.add_request(request)
 
 				if self.tcp_connection:
-					print "Send to Postman"
 					self.send_to_postman(request)
+					print "Sent to Postman"
 		except Exception as ex:
 			logging.exception("Something awful happened!")
 
 		msg.reply()
 
 	def handle_response(self, msg):
+		print "Sent response"
 		msg.reply()
